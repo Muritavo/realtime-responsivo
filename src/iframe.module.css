@@ -1,0 +1,26 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.base {
+  width: 960px;
+  height: 540px;
+}
+
+.base {
+  width: 1920px;
+  height: 1080px;
+  margin-right: -960px;
+  margin-bottom: -540px;
+
+
+  transform: scale(0.5);
+  transform-origin: 0 0;
+}
+
+.mobile {
+    width: 320px;
+    height: 568px;
+}
