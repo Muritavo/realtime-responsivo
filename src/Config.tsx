@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 
 export type Config = {
-  resolutions: { width: number; height: number; mobile: boolean }[];
+  resolutions: {
+    width: number;
+    height: number;
+    mobile: boolean;
+    active: boolean;
+  }[];
   baseResolution: number;
-  latestUrl: string,
-  isMobileFirst: boolean
+  latestUrl: string;
+  isMobileFirst: boolean;
 };
 
 export const DEFAULT_RESOLUTION = [
@@ -12,11 +17,13 @@ export const DEFAULT_RESOLUTION = [
     height: 1080,
     width: 1920,
     mobile: false,
+    active: true
   },
   {
     height: 568,
     width: 320,
     mobile: true,
+    active: true
   },
 ];
 
@@ -71,6 +78,19 @@ export default function ConfigComponent() {
             />
           </td>
           <td>
+            <p>Ativo</p>
+            <input
+              type="checkbox"
+              defaultChecked={form.resolutions[i].active}
+              onChange={({ target: { checked } }) =>
+                setForm((prevForm) => {
+                  prevForm.resolutions[i].active = checked;
+                  return { ...prevForm };
+                })
+              }
+            />
+          </td>
+          <td>
             <p>Mobile</p>
             <input
               type="checkbox"
@@ -107,6 +127,7 @@ export default function ConfigComponent() {
                 width: 1920,
                 height: 1080,
                 mobile: false,
+                active: true
               },
             ],
           }))

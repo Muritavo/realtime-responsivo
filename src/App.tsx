@@ -50,7 +50,7 @@ function App() {
 
   const resolutionsSorted = useMemo(
     () =>
-      resolutions.sort(({ mobile }, { mobile: mobile2 }) =>
+      resolutions.filter(r => r.active).sort(({ mobile }, { mobile: mobile2 }) =>
         isMobileFirst
           ? Number(mobile2) - Number(mobile)
           : Number(mobile) - Number(mobile2)
