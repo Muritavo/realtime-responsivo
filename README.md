@@ -5,7 +5,7 @@ This project is a tool to replicate layout changes on multiple resolutions at th
 This allows to in realtime see the changes to the stylesheet reflected on multiple resolutions
 
 # How to use it
-- Start the application as usual using yarn start
+- Start the application as usual using yarn start (**hint**: use build and serve ./build for better performance)
 - Start an instance of the browser that has the web security disabled (since there is communication between iframes)
 - Access the application at http://localhost:10000
 - By default there are two resolutions configured, you can configure more on advanced config
