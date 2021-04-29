@@ -7,6 +7,12 @@ This allows to in realtime see the changes to the stylesheet reflected on multip
 # How to use it
 - Start the application as usual using yarn start (**hint**: use build and serve ./build for better performance)
 - Start an instance of the browser that has the web security disabled (since there is communication between iframes)
+
+```bash
+# For MAC
+open -na /Applications/Google\ Chrome.app --args --disable-web-security --user-data-dir="/tmp/chrome"
+
+```
 - Access the application at http://localhost:10000
 - By default there are two resolutions configured, you can configure more on advanced config
 - Provide the initial URL and be happy :)
