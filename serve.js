@@ -8,7 +8,11 @@ const server = http.createServer((request, response) => {
   // More details here: https://github.com/vercel/serve-handler#options
   return handler(request, response, {
       directoryListing: false,
-      public: "./build"
+      public: "./build",
+      rewrites: [{
+          source: "*",
+          destination: "index.html"
+      }]
   });
 })
 
