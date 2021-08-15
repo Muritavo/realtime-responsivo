@@ -10,7 +10,7 @@ This allows to in realtime see the changes to the stylesheet reflected on multip
 
 ```bash
 # For MAC
-open -na /Applications/Google\ Chrome.app --args --disable-web-security --user-data-dir="/tmp/chrome"
+open -na /Applications/Google\ Chrome.app --args --disable-web-security --user-data-dir="/tmp/chrome" --disable-site-isolation-trials
 
 ```
 - Access the application at http://localhost:10000
