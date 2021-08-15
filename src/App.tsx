@@ -6,6 +6,13 @@ import {
   getConfigFromStorage,
 } from "./Config";
 import iframe from "./iframe.module.css";
+import throttle from "lodash/throttle";
+
+const throttledFunction = throttle((extraIframesRefs: HTMLIFrameElement[], url: string, html: string) => {
+  extraIframesRefs.filter(Boolean).forEach((iframe) => {
+    iframe.contentWindow!.document.children[0].innerHTML = `<base href="${url}">${html}`;
+  });
+}, 300);
 
 function App() {
   const [config, setConfig] = useState<Config>(getConfigFromStorage());
@@ -30,22 +37,9 @@ function App() {
 
   function onLoadedMainIframe({ target }: any) {
     window.onmessage = (e: any) => {
-      extraIframesRefs.current.filter(Boolean).forEach((iframe) => {
-        iframe.contentWindow!.document.children[0].innerHTML = `<base href="${urlConfirmada}">${e.data.newHTML}`;
-      });
+      throttledFunction(extraIframesRefs.current, urlConfirmada, e.data.newHTML);
     };
-    target.contentWindow.eval(`new MutationObserver(() => {
-        window.parent.postMessage({
-          type: "MainUpdate",
-          newHTML: document.children[0].innerHTML,
-          newBody: document.body.innerHTML
-        }, '*')
-      }).observe(document.children[0], {childList: true,
-  attributes: true,
-  characterData: true,
-  subtree: true,
-  attributeOldValue: true,
-  characterDataOldValue: true})`);
+    target.contentWindow.eval(`(${monitoringFunction.toString()})()`);
   }
 
   const resolutionsSorted = useMemo(
@@ -57,8 +51,6 @@ function App() {
       ),
     [isMobileFirst, resolutions]
   );
-
-  console.warn("resolutions", resolutionsSorted);
 
   return (
     <div className="App">
@@ -111,7 +103,7 @@ function App() {
               transformOrigin: "0 0",
             };
             return (
-              <div>
+              <div key={String(i)}>
                 {i === 0 ? (
                   <iframe
                     title={title}
@@ -124,6 +116,7 @@ function App() {
                     title={title}
                     ref={registerIframe(i - 1)}
                     style={style}
+                    sandbox=""
                   />
                 )}
                 <p className=".disclaimer">{title}</p>
@@ -134,6 +127,45 @@ function App() {
       )}
     </div>
   );
+}
+
+function monitoringFunction() {
+  const IGNORED_NDOES = ["SCRIPT", "#comment", "META"];
+  function allowedNode(node: Node) {
+    return !IGNORED_NDOES.includes(node.nodeName);
+  }
+  document.querySelectorAll("noscript").forEach(e => e.remove());
+  new MutationObserver((mutations) => {
+    const detectedMutations = mutations.filter(a => {
+      switch (a.type) {
+        case "childList":
+          const addedNodes = Array.from(a.addedNodes).filter(a => allowedNode(a));
+          const removedNodes = Array.from(a.removedNodes).filter(a => allowedNode(a));
+
+          return addedNodes.length || removedNodes.length;
+        case "attributes":
+          return allowedNode(a.target);
+        case "characterData":
+          return true;
+      }
+    });
+    console.warn(detectedMutations.map(m => m.type))
+
+    if (detectedMutations.length) {
+      debugger;
+      window.parent.postMessage({
+        type: "MainUpdate",
+        newHTML: document.children[0].innerHTML,
+      }, '*')
+    }
+  }).observe(document.children[0], {
+    childList: true,
+    attributes: true,
+    characterData: true,
+    subtree: true,
+    attributeOldValue: true,
+    characterDataOldValue: true
+  })
 }
 
 export default App;
