@@ -14,6 +14,15 @@ const throttledFunction = throttle((extraIframesRefs: HTMLIFrameElement[], url: 
   });
 }, 300);
 
+const getCssSelector = (el: any) => {
+  let path = [], parent;
+  while (parent = el.parentNode) {
+    path.unshift(`${el.tagName}:nth-child(${([].indexOf.call as any)(parent.children, el)+1})`);
+    el = parent;
+  }
+  return `${path.join(' > ')}`.toLowerCase();
+};
+
 function App() {
   const [config, setConfig] = useState<Config>(getConfigFromStorage());
   const {
@@ -40,6 +49,14 @@ function App() {
       throttledFunction(extraIframesRefs.current, urlConfirmada, e.data.newHTML);
     };
     target.contentWindow.eval(`(${monitoringFunction.toString()})()`);
+    extraIframesRefs.current.filter(Boolean).forEach((iframe) => {
+      iframe.contentWindow!.addEventListener("click", ({target: extraIframeTarget}) => {
+        if (extraIframeTarget) {
+          const selector = getCssSelector(extraIframeTarget);
+          target.contentWindow.eval(`document.querySelector("${selector}").dispatchEvent(new Event("click", {bubbles: true}))`);
+        }
+      });
+    });
   }
 
   const resolutionsSorted = useMemo(
@@ -116,7 +133,6 @@ function App() {
                     title={title}
                     ref={registerIframe(i - 1)}
                     style={style}
-                    sandbox=""
                   />
                 )}
                 <p className=".disclaimer">{title}</p>
@@ -149,13 +165,23 @@ function monitoringFunction() {
           return true;
       }
     });
-    console.warn(detectedMutations.map(m => m.type))
 
     if (detectedMutations.length) {
       debugger;
+      const parser = new DOMParser();
+      const documentManipulator = parser.parseFromString(document.children[0].outerHTML, "text/html");
+      const allToRemove = Array.from(documentManipulator.querySelectorAll("script,link")).filter(a => {
+        const src = a.getAttribute("src") || a.getAttribute("href");
+
+        if (!src || src.startsWith("/"))
+          return false;
+        else
+          return !src.includes(window.location.origin);
+      });
+      allToRemove.forEach(a => a.outerHTML = "<link></link>");
       window.parent.postMessage({
         type: "MainUpdate",
-        newHTML: document.children[0].innerHTML,
+        newHTML: documentManipulator.children[0].innerHTML,
       }, '*')
     }
   }).observe(document.children[0], {
