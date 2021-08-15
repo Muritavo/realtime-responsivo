@@ -5,7 +5,9 @@ This project is a tool to replicate layout changes on multiple resolutions at th
 This allows to in realtime see the changes to the stylesheet reflected on multiple resolutions
 
 # How to use it
-- Start the application as usual using yarn start (**hint**: use build and serve ./build for better performance)
+- Start this application:
+    - **Recommended**: You can install this tool globally using <br>``npm i -g @muritavo/realtime-responsive``<br> and starting it with the command:<br>``realtime-responsive`` 
+    - You can do so by cloning this project and running yarn start
 - Start an instance of the browser that has the web security disabled (since there is communication between iframes)
 
 ```bash
